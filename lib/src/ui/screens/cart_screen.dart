@@ -88,25 +88,27 @@ class _CartScreenState extends State<CartScreen> {
                   'Total: \$${ProductsManagementService.calculateTotal(context)}',
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: ElevatedButton.icon(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      fixedSize: const Size(230, 50),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 70, top: 10, bottom: 15),
+                    child: ElevatedButton.icon(
+                      onPressed: null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                        fixedSize: const Size(230, 50),
+                      ),
+                      label: const Text(
+                        'Checkout',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      icon: const Icon(Icons.arrow_forward_sharp, size: 30),
+                      iconAlignment: IconAlignment.end,
                     ),
-                    label: const Text(
-                      'Checkout',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    icon: const Icon(Icons.arrow_forward_sharp, size: 30),
-                    iconAlignment: IconAlignment.end,
                   ),
                 )
               ],

@@ -61,11 +61,13 @@ class _AvatarState extends State<Avatar> {
               child: ElevatedButton(
                 onPressed: _isLoading
                     ? null
-                    : () {
-                        UserPersonalInfoService.upload(context, widget.onUpload, _toggleLoading);
-                        context.showSnackBar('Uploading...');
-                        Future.delayed(const Duration(seconds: 1));
-                        Navigator.pushReplacementNamed(context, 'home');
+                    : () async {
+                        await UserPersonalInfoService.upload(context, widget.onUpload, _toggleLoading);
+                        if (context.mounted) {
+                          context.showSnackBar('Uploading...');
+                          Future.delayed(const Duration(seconds: 1));
+                          Navigator.pushReplacementNamed(context, 'home');
+                        }
                       },
                 style: style,
                 child: Text(

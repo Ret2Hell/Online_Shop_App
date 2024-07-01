@@ -46,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontFamily: 'Agne',
               ),
               child: AnimatedTextKit(
+                isRepeatingAnimation: false,
                 animatedTexts: [
                   TypewriterAnimatedText('By Ret2Hell', speed: const Duration(milliseconds: 100)),
                 ],
