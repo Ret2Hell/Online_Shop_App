@@ -1,38 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:online_shop/main.dart';
+import 'package:online_shop/src/services/providers/account_info_provider.dart';
 import 'package:online_shop/src/ui/components/show_snackbar.dart';
 import 'package:online_shop/src/ui/screens/avatar_upload_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserPersonalInfoService {
-  static Future<void> updateProfile(BuildContext context, TextEditingController usernameController, TextEditingController fullnameController, Function(bool) toggleLoading) async {
+  static Future<void> updateProfile(BuildContext context, TextEditingController usernameController, TextEditingController fullnameController, Function(bool) toggleLoading, bool isSetup) async {
     toggleLoading(true);
     final username = usernameController.text.trim();
     final fullname = fullnameController.text.trim();
-    if (username.isEmpty || fullname.isEmpty) {
-      context.showSnackBar('Please fill in all fields', isError: true);
-      toggleLoading(false);
-      return;
+    if (isSetup) {
+      if (username.isEmpty || fullname.isEmpty) {
+        context.showSnackBar('Please fill in all fields', isError: true);
+        toggleLoading(false);
+        return;
+      }
+    } else {
+      if (username.isEmpty && fullname.isEmpty) {
+        context.showSnackBar('Please fill in at least one field', isError: true);
+        toggleLoading(false);
+        return;
+      }
     }
+
     final user = supabase.auth.currentUser;
     final updates = {
       'id': user!.id,
-      'username': username,
-      'full_name': fullname,
       'updated_at': DateTime.now().toIso8601String(),
     };
+    if (username.isNotEmpty) {
+      updates['username'] = username;
+    }
+    if (fullname.isNotEmpty) {
+      updates['full_name'] = fullname;
+    }
+
     try {
       await supabase.from('profiles').upsert(updates);
       if (context.mounted) {
         context.showSnackBar('Successfully updated profile!');
-        await Future.delayed(const Duration(seconds: 1));
-        if (context.mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const AvatarUploadScreen(),
-            ),
-          );
+        if (username.isNotEmpty) {
+          context.read<AccountInfoProvider>().updateAccountInfoField('username', username);
+        }
+        if (fullname.isNotEmpty) {
+          context.read<AccountInfoProvider>().updateAccountInfoField('full_name', fullname);
+        }
+        usernameController.clear();
+        fullnameController.clear();
+        if (isSetup) {
+          await Future.delayed(const Duration(seconds: 1));
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const AvatarUploadScreen(),
+              ),
+            );
+          }
         }
       }
     } on PostgrestException catch (error) {

@@ -129,13 +129,9 @@ class ProductsManagementService {
     }
   }
 
-  static Future<void> removeFromCart(BuildContext context, String id, Function refreshUponDelete) async {
+  static Future<void> removeFromCart(BuildContext context, String id) async {
     try {
       await supabase.from('cart').delete().eq('id', id);
-      if (context.mounted) {
-        context.read<CartProvider>().removeProduct(id);
-        refreshUponDelete();
-      }
     } on AuthException catch (error) {
       if (context.mounted) {
         context.showSnackBar(error.message, isError: true);

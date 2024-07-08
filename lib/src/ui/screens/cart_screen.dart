@@ -12,7 +12,9 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  void _refreshUponDelete() {
+  void deleteCartItem(BuildContext context, String id) {
+    ProductsManagementService.removeFromCart(context, id);
+    context.read<CartProvider>().removeProduct(id);
     setState(() {});
   }
 
@@ -48,7 +50,7 @@ class _CartScreenState extends State<CartScreen> {
                     motion: const StretchMotion(),
                     children: [
                       SlidableAction(
-                        onPressed: (context) => ProductsManagementService.removeFromCart(context, cartItem.id, _refreshUponDelete),
+                        onPressed: (context) => deleteCartItem(context, cartItem.id),
                         label: 'Delete',
                         backgroundColor: Colors.red,
                         icon: Icons.delete,

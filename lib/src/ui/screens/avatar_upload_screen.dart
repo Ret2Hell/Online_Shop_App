@@ -32,6 +32,7 @@ class _AvatarUploadScreenState extends State<AvatarUploadScreen> {
         children: [
           Avatar(
               imageUrl: _imageUrl,
+              isSetup: true,
               onUpload: (imageUrl) async {
                 setState(() {
                   _imageUrl = imageUrl;

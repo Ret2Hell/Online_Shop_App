@@ -3,14 +3,11 @@ import 'package:online_shop/src/services/authentication_services/user_personal_i
 import 'package:online_shop/src/ui/components/show_snackbar.dart';
 
 class Avatar extends StatefulWidget {
-  const Avatar({
-    super.key,
-    required this.imageUrl,
-    required this.onUpload,
-  });
-
   final String? imageUrl;
   final void Function(String) onUpload;
+  final bool isSetup;
+
+  const Avatar({super.key, required this.imageUrl, required this.onUpload, required this.isSetup});
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -43,19 +40,21 @@ class _AvatarState extends State<Avatar> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, 'home');
-                },
-                style: style,
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
+            widget.isSetup
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, 'home');
+                      },
+                      style: style,
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -65,8 +64,10 @@ class _AvatarState extends State<Avatar> {
                         await UserPersonalInfoService.upload(context, widget.onUpload, _toggleLoading);
                         if (context.mounted) {
                           context.showSnackBar('Uploading...');
-                          Future.delayed(const Duration(seconds: 1));
-                          Navigator.pushReplacementNamed(context, 'home');
+                          if (widget.isSetup) {
+                            Future.delayed(const Duration(seconds: 3));
+                            Navigator.pushReplacementNamed(context, 'home');
+                          }
                         }
                       },
                 style: style,

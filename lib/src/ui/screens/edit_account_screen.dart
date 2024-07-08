@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:online_shop/main.dart';
 import 'package:online_shop/src/services/authentication_services/user_personal_info_service.dart';
+import 'package:online_shop/src/services/providers/account_info_provider.dart';
+import 'package:online_shop/src/ui/components/avatar.dart';
+import 'package:provider/provider.dart';
 
-class ProfileSetupScreen extends StatefulWidget {
-  const ProfileSetupScreen({super.key});
+class EditAccountScreen extends StatefulWidget {
+  const EditAccountScreen({super.key});
 
   @override
-  State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
+  State<EditAccountScreen> createState() => _EditAccountScreenState();
 }
 
-class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
+class _EditAccountScreenState extends State<EditAccountScreen> {
   final _usernameController = TextEditingController();
   final _fullnameController = TextEditingController();
-  String username = '';
 
   var _isLoading = false;
 
@@ -35,11 +38,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accountInfo = context.watch<AccountInfoProvider>().accountInfo;
+    final imageUrl = accountInfo['avatarUrl'];
+    final previousImageUrl = imageUrl;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Profile',
+          'Edit Account',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         centerTitle: true,
@@ -47,6 +53,31 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         children: [
+          Avatar(
+              imageUrl: imageUrl,
+              isSetup: false,
+              onUpload: (imageUrl) async {
+                setState(() {
+                  imageUrl = imageUrl;
+                });
+                final userId = supabase.auth.currentUser!.id;
+
+                if (previousImageUrl != null) {
+                  String imagePath = previousImageUrl.split('/').last;
+                  imagePath = imagePath.substring(0, imagePath.indexOf('?'));
+                  await supabase.storage.from('avatars').remove([
+                    imagePath
+                  ]);
+                }
+
+                await supabase.from('profiles').update({
+                  'avatar_url': imageUrl,
+                  'updated_at': DateTime.now().toIso8601String(),
+                }).eq('id', userId);
+                if (context.mounted) {
+                  context.read<AccountInfoProvider>().updateAccountInfoField('avatarUrl', imageUrl);
+                }
+              }),
           TextFormField(
             controller: _usernameController,
             decoration: const InputDecoration(labelText: 'User Name'),
@@ -61,7 +92,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             onPressed: _isLoading
                 ? null
                 : () {
-                    UserPersonalInfoService.updateProfile(context, _usernameController, _fullnameController, _toggleLoading, true);
+                    UserPersonalInfoService.updateProfile(context, _usernameController, _fullnameController, _toggleLoading, false);
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
